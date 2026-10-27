@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function checkAuthentication() {
+  updateDatabaseUiElements();
   if (!APP_CONFIG.SCRIPT_URL || APP_CONFIG.SCRIPT_URL.trim() === '') {
     openApiConfigModal();
     return;
@@ -138,6 +139,7 @@ function setupUserInterface() {
   }
 
   loadCommonDropdowns();
+  updateDatabaseUiElements();
   navigateTo('dashboard');
 }
 
@@ -316,6 +318,13 @@ function loadDashboardData() {
       document.getElementById('header-school-name').innerText = d.namaSekolah || 'SD Negeri Cerdas Bangsa';
       document.getElementById('dash-date-badge').innerText = d.currentDay + ', ' + d.todayFormatted;
       document.getElementById('dash-semester-badge').innerText = 'Semester ' + d.semesterAktif + ' (' + d.tahunAktif + ')';
+
+      if (d.databaseInfo && d.databaseInfo.spreadsheetUrl) {
+        var btnSheet = document.getElementById('btn-open-spreadsheet');
+        var nameSheet = document.getElementById('set-spreadsheet-name');
+        if (btnSheet) btnSheet.href = d.databaseInfo.spreadsheetUrl;
+        if (nameSheet && d.databaseInfo.spreadsheetName) nameSheet.innerText = d.databaseInfo.spreadsheetName;
+      }
 
       if (d.role === 'ADMIN') {
         document.getElementById('metric-total-siswa').innerText = d.metrics.totalSiswa || 0;
@@ -1986,6 +1995,7 @@ function loadAuditLogs() {
 // PENGATURAN & KEAMANAN CONTROLLER
 // ============================================================================
 function initSettingsView() {
+  updateDatabaseUiElements();
   if (AppState.user.Role === 'ADMIN') {
     callApi('apiGetSchoolSettings', AppState.token)
       .then(function(res) {
@@ -1997,6 +2007,14 @@ function initSettingsView() {
         document.getElementById('set-alamat').value = s.ALAMAT_SEKOLAH || '';
         document.getElementById('set-kepsek').value = s.KEPALA_SEKOLAH || '';
         document.getElementById('set-nip-kepsek').value = s.NIP_KEPALA_SEKOLAH || '';
+
+        // Tampilkan link Spreadsheet Google Sheets jika tersedia
+        if (s._SPREADSHEET_URL) {
+          var btnSheet = document.getElementById('btn-open-spreadsheet');
+          var nameSheet = document.getElementById('set-spreadsheet-name');
+          if (btnSheet) btnSheet.href = s._SPREADSHEET_URL;
+          if (nameSheet) nameSheet.innerText = s._SPREADSHEET_NAME || 'Buka Database Google Sheets';
+        }
       });
   }
 }
@@ -2161,4 +2179,56 @@ function loadCommonDropdowns() {
     .then(function(res) {
       if (res.success) AppState.subjectsCache = res.data;
     });
+}
+
+// ============================================================================
+// DATABASE URL & KONEKSI GOOGLE APPS SCRIPT (BERJALAN DI BELAKANG LAYAR)
+// ============================================================================
+function updateDatabaseUiElements() {
+  var url = APP_CONFIG.SCRIPT_URL || localStorage.getItem('sd_gas_api_url') || 'Belum diatur';
+  
+  // Tampilkan di sidebar
+  var sbEl = document.getElementById('sidebar-gas-url-preview');
+  if (sbEl) {
+    sbEl.innerText = url;
+    sbEl.title = url;
+  }
+
+  // Tampilkan di pengaturan
+  var setEl = document.getElementById('set-gas-url-text');
+  if (setEl) {
+    setEl.innerText = url;
+    setEl.title = url;
+  }
+}
+
+function testGasDatabaseConnection() {
+  var startTime = Date.now();
+  showToast('Mengirim sinyal uji ke Google Apps Script backend...', 'info');
+
+  callApi('apiCheckSession', AppState.token)
+    .then(function(res) {
+      var latency = Date.now() - startTime;
+      if (res && res.success) {
+        showToast('🟢 Terhubung ke Google Apps Script! Latensi respon: ' + latency + ' ms.', 'success');
+      } else {
+        showToast('🟢 Backend Google Apps Script aktif (Respon: ' + latency + ' ms).', 'success');
+      }
+    })
+    .catch(function(err) {
+      showToast('❌ Gagal menghubungi Google Apps Script: ' + err.message, 'error');
+    });
+}
+
+function copyGasUrl() {
+  var url = APP_CONFIG.SCRIPT_URL || localStorage.getItem('sd_gas_api_url') || '';
+  if (!url) {
+    showToast('URL Google Apps Script belum diisi.', 'warning');
+    return;
+  }
+  navigator.clipboard.writeText(url).then(function() {
+    showToast('URL Google Apps Script berhasil disalin ke clipboard!', 'success');
+  }).catch(function() {
+    prompt('Salin URL Google Apps Script:', url);
+  });
 }

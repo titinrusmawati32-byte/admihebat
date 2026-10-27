@@ -116,8 +116,13 @@
         </button>
       </div>
 
-      <div style="margin-top: 24px; font-size: 11px; color: #94A3B8;">
-        Frontend GitHub Pages &bull; Backend Google Apps Script &bull; v1.0.0
+      <div style="margin-top: 18px; font-size: 11px; color: #475569; background: #F1F5F9; padding: 8px 12px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+        <span class="pulse-dot"></span>
+        <span><strong>Database Backend:</strong> Google Apps Script (Aktif di background)</span>
+      </div>
+
+      <div style="margin-top: 14px; font-size: 11px; color: #94A3B8;">
+        Frontend Vercel / GitHub &bull; Backend Google Apps Script &bull; v1.0.0
       </div>
 
     </div>
@@ -193,11 +198,23 @@
         </li>
       </ul>
 
-      <div class="sidebar-footer-widget">
-        <div class="widget-icon">📂</div>
-        <div class="widget-title">Google Drive Cloud</div>
-        <div class="widget-subtitle">Tersinkronisasi Otomatis</div>
-        <button class="widget-btn" onclick="openDriveFolderLink()">Buka Berkas</button>
+      <!-- Status Koneksi Database Google Apps Script (Berjalan di Belakang Layar) -->
+      <div class="sidebar-footer-widget" style="text-align: left; background: #FFFFFF; border: 1px solid var(--border-color); padding: 14px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 11px; font-weight: 800; color: var(--text-main); text-transform: uppercase;">Database Backend</span>
+          <div class="live-pulse-indicator" style="padding: 2px 8px; font-size: 10px;">
+            <span class="pulse-dot"></span> Online
+          </div>
+        </div>
+        <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 6px;">
+          ⚡ <strong>Google Apps Script</strong> (Berjalan di background)
+        </div>
+        <div style="background: var(--bg-card-subtle); padding: 6px 8px; border-radius: 6px; font-size: 10px; font-family: monospace; color: var(--text-muted); word-break: break-all; margin-bottom: 10px;" id="sidebar-gas-url-preview">
+          https://script.google.com/macros/s/...
+        </div>
+        <button class="btn btn-secondary btn-sm" style="width: 100%; font-size: 11px; padding: 6px;" onclick="openApiConfigModal()">
+          ⚙️ Kelola URL Database
+        </button>
       </div>
     </aside>
 
@@ -215,6 +232,11 @@
         </div>
 
         <div class="header-right">
+          <div class="live-pulse-indicator" id="topbar-db-status" title="Google Apps Script berjalan di latar belakang">
+            <span class="pulse-dot"></span>
+            <span>Database GAS Aktif</span>
+          </div>
+
           <div class="header-badge-school">
             <span>🇮🇩</span>
             <span id="header-school-name">SD Negeri Cerdas Bangsa</span>
@@ -910,6 +932,50 @@
 
         <!-- 7. PENGATURAN VIEW -->
         <div id="view-settings" class="app-view" style="display: none;">
+          <!-- Card Informasi Koneksi Database Google Apps Script -->
+          <div class="content-card" style="margin-bottom: 24px; padding: 22px 26px; border-left: 6px solid var(--accent-emerald);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 16px;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                  <h3 style="font-size: 17px; font-weight: 800; color: var(--text-main);">🗄️ Koneksi Database Google Apps Script</h3>
+                  <div class="live-pulse-indicator">
+                    <span class="pulse-dot"></span>
+                    <span id="set-db-status-text">Berjalan di Belakang Aplikasi (Aktif)</span>
+                  </div>
+                </div>
+                <p style="font-size: 13px; color: var(--text-secondary);">
+                  Aplikasi web ini menggunakan Google Apps Script sebagai serverless API & Google Sheets sebagai basis data relasional.
+                </p>
+              </div>
+
+              <button class="btn btn-secondary btn-sm" onclick="testGasDatabaseConnection()">
+                ⚡ Uji Koneksi / Ping Backend
+              </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+              <div>
+                <label class="form-label">Endpoint URL Google Apps Script:</label>
+                <div class="gas-url-badge-box">
+                  <span id="set-gas-url-text">https://script.google.com/macros/s/.../exec</span>
+                  <button class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;" onclick="copyGasUrl()">
+                    📋 Salin
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label class="form-label">Database Google Spreadsheet:</label>
+                <div class="gas-url-badge-box">
+                  <span id="set-spreadsheet-name">Database Administrasi Guru SD</span>
+                  <a href="#" target="_blank" id="btn-open-spreadsheet" class="btn btn-primary btn-sm" style="padding: 4px 10px; font-size: 11px;">
+                    ↗️ Buka Sheet
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;" class="dashboard-grid">
             <div class="content-card" id="card-settings-school" style="display: none;">
               <div class="card-header-clean"><h3><span>🏫</span> Profil Identitas Sekolah</h3></div>
