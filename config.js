@@ -9,7 +9,7 @@
 
 var APP_CONFIG = {
   // Web App URL dari Deployment Google Apps Script Anda:
-  SCRIPT_URL: '', 
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwEgSYqxYuZzDiBrOyr0G2uoD_U2JCCxk5yCuSY-qa1BWhwypZHthcBVF6m_RWAc4RO/exec', 
   
   APP_NAME: 'Administrasi Guru SD',
   VERSION: '1.0.0',
